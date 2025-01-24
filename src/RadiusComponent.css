@@ -1,0 +1,66 @@
+/* RadiusComponent.css */
+
+.radius-popup {
+    position: absolute;
+    top: 50%; /* Adjusts the vertical position of the popup */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    z-index: 1000; /* Ensures it appears above the map */
+    width: 300px;
+    font-family: Arial, sans-serif;
+}
+  
+.radius-popup h3 {
+    margin-bottom: 12px;
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+}
+  
+.radius-popup input {
+    width: 65%;
+    padding: 8px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+  
+.radius-popup .button-container {
+    display: flex; /* Use flexbox for alignment */
+    justify-content: space-between; /* Space buttons evenly */
+    margin-top: 10px; /* Optional margin for spacing above buttons */
+}
+
+.radius-popup button {
+    flex: 1; /* Allow buttons to take equal space */
+    background-color: #007cbf;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px; /* Adds spacing between buttons */
+}
+
+.radius-popup button:last-child {
+    margin-right: 0; /* Removes right margin from the last button */
+}
+
+.radius-popup button.close-button {
+    
+    background-color: #ff4d4d; /* Close button color */
+}
+
+.radius-popup button.close-button:hover {
+    background-color: #cc0000; /* Darker red on hover */
+}  
+
+.radius-popup button:hover {
+    background-color: #005f8f;
+}

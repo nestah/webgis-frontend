@@ -1,0 +1,105 @@
+*{
+  box-sizing: border-box;
+}
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+}
+.App{
+  display:flex;
+  height:100vh;
+  flex-direction: column;
+}
+/* search */
+.search-input {
+  padding: 0.5rem;
+  margin-right: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+/* filter-section */
+.filter-section{
+  display:flex;
+  padding:.5rem 2rem;
+  background-color: #f8f8f8;
+  justify-content: space-between;
+}
+.facility-type-filter{
+  padding:.5rem 2rem 0.5rem 0.5rem;
+  border-radius: 4px;
+  border:1px solid #ccc;
+  background-color: #ffffff;
+  color: #333;
+  width: 100%;
+  cursor: pointer;
+  margin-right: 1rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+ position: relative;
+
+}
+.facility-type-filter :focus{
+  border-color: #2296bb;
+  outline: none;
+  box-shadow: 0 0 5px rgba(34, 150, 187, 0.5);
+}
+/* Dropdown Arrow Styling */
+.facility-type-filter-wrapper {
+  position: relative; /* For positioning the arrow */
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+
+}
+/* .facility-type-filter-wrapper::after{
+  content: '▼'; 
+  font-size: 0.7rem;
+  color: #333;
+  position: absolute;
+  right: 1rem;
+  right:1.5rem;
+  top:50%;
+  transform: translateY(-50%);
+  pointer-events: none; 
+
+} */
+.facility-type-filter::-ms-expand {
+  display: none; /* Remove default arrow in IE */
+}
+/* main section */
+.main-section{
+  position: relative;
+  /* display: flex; */
+  background-color: #f4f4f4;
+  /* justify-content: center; */
+  flex-grow: 1;
+  /* align-items: center; */
+
+}
+/* Set crosshair cursor for the map container */
+.maplibre-container {
+  cursor: crosshair; /* Or any other desired cursor */
+}
+/* marker */
+.marker {
+  background-color: #ff0000; /* Example: Red */
+  border-radius: 50%;
+  width: 10px; /* Adjust size */
+  height: 10px; /* Adjust size */
+  position: relative; /* Needed for positioning */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+}
+
+/* footer styles */
+.footer{
+  background-color:#eeeee4;
+  padding:1rem;
+  color: #000;
+  text-align: center;
+}
