@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import axios from 'axios';
@@ -155,9 +155,25 @@ function AppContent() {
       ? allFacilities 
       : allFacilities.filter(facility => facility.facility_type === selectedFacilityType);
   }, [facilities, uploadedFacilities, selectedFacilityType]);
+// defining handlecontextmenu here 
+const handleContextMenu = useCallback((lngLat) => {
+  if (!lngLat) return;
+  
+  if (tempMarker) {
+    tempMarker.remove();
+  }
+
+  const newMarker = new maplibregl.Marker({ color: 'red' })
+    .setLngLat([lngLat.lng, lngLat.lat])
+    .addTo(map.current);
+  
+  setTempMarker(newMarker);
+  setRadiusCenter(lngLat);
+  setShowRadiusPopup(true);
+},[tempMarker]);
 
   // Touch event handlers
-  const handleTouchStart = (e) => {
+  const handleTouchStart = useCallback((e) => {
     if (e.touches.length !== 1) return;
     
     const touch = e.touches[0];
@@ -172,41 +188,26 @@ function AppContent() {
       
       handleContextMenu(point);
     }, MAP_CONSTANTS.LONG_PRESS_DURATION);
-  };
+  },[handleContextMenu]);
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     if (longPressTimeout.current) {
       clearTimeout(longPressTimeout.current);
     }
-  };
+  },[]);
 
-  const handleContextMenu = (lngLat) => {
-    if (!lngLat) return;
-    
-    if (tempMarker) {
-      tempMarker.remove();
-    }
-
-    const newMarker = new maplibregl.Marker({ color: 'red' })
-      .setLngLat([lngLat.lng, lngLat.lat])
-      .addTo(map.current);
-    
-    setTempMarker(newMarker);
-    setRadiusCenter(lngLat);
-    setShowRadiusPopup(true);
-  };
-
+ 
   // Initialize map
   useEffect(() => {
     if (map.current) return;
-
+    const container = mapContainer.current;
     const initialLoader = document.getElementById('initial-loader');
     if (initialLoader) {
       initialLoader.remove();
     }
 
     map.current = new maplibregl.Map({
-      container: mapContainer.current,
+      container: container,
       style: `https://api.maptiler.com/maps/streets/style.json?key=${MAP_CONSTANTS.MAPTILER_KEY}`,
       center: [viewport.longitude, viewport.latitude],
       zoom: viewport.zoom,
@@ -224,19 +225,19 @@ function AppContent() {
       setContentLoaded(true);
     });
 
-    mapContainer.current.addEventListener('touchstart', handleTouchStart);
-    mapContainer.current.addEventListener('touchend', handleTouchEnd);
-    mapContainer.current.addEventListener('touchcancel', handleTouchEnd);
+    container.addEventListener('touchstart', handleTouchStart);
+    container.addEventListener('touchend', handleTouchEnd);
+    container.addEventListener('touchcancel', handleTouchEnd);
 
     return () => {
       map.current.remove();
-      if (mapContainer.current) {
-        mapContainer.current.removeEventListener('touchstart', handleTouchStart);
-        mapContainer.current.removeEventListener('touchend', handleTouchEnd);
-        mapContainer.current.removeEventListener('touchcancel', handleTouchEnd);
+      if (container) {
+        container.removeEventListener('touchstart', handleTouchStart);
+        container.removeEventListener('touchend', handleTouchEnd);
+        container.removeEventListener('touchcancel', handleTouchEnd);
       }
     };
-  }, []);
+  }, [handleContextMenu, handleTouchStart,handleTouchEnd, viewport.latitude, viewport.longitude, viewport.zoom]);
 
   // Enhanced data fetching
   useEffect(() => {
