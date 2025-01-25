@@ -18,7 +18,7 @@ setShowUploadPopup(true)
 
     return(
         <nav className="navbar">
-            <div className="logo"><a href="/">GTL</a></div>
+            <div className="logo"><a href="/">GTL-Afya</a></div>
             <ul className={`nav-links ${isOpen ? 'nav-active':''}`}>
                 <li><a href="/">Home</a></li>
                 <li><a href="#about">About</a></li>
