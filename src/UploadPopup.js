@@ -26,7 +26,7 @@ const UploadPopup = ({ onClose, onUploadSuccess }) => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('https://364e-102-215-77-202.ngrok-free.app/api/upload-csv', formData, {
+            const response = await axios.post('https://aiven-webgis-backend.vercel.app/api/upload-csv', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
