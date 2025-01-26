@@ -1,6 +1,6 @@
 # WebGIS Application
 
-A web-based geographic information system (GIS) application that enables visualization, spatial querying, and filtering of geospatial data. This application utilizes React and Leaflet for the frontend map visualization, and a PostgreSQL/PostGIS database for backend geospatial data storage and retrieval.
+A web-based geographic information system (GIS) application that enables visualization, spatial querying, and filtering of geospatial data. This application utilizes React and Maplibre for the frontend map visualization, and a PostgreSQL/PostGIS database for backend geospatial data storage and retrieval.
 
 ## Features
 
@@ -31,23 +31,22 @@ Ensure you have the following installed on your machine:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/nestah/webgis-application.git
-cd webgis-application
+git clone https://github.com/nestah/webGIS.git
+cd webGIS
 ```
 
 ### 2. Install Dependencies
 
 #### Frontend
 
-Navigate to the project folder and install dependencies:
+Navigate to the frontend folder and install dependencies:
 
 ```bash
-cd project directory
+cd frontend
 npm install
 ```
 
 #### Backend
-You can choose to run the backend using the existing node modules or delete and follow the steps:
 Navigate to the backend folder and install dependencies:
 
 ```bash
@@ -102,15 +101,15 @@ IMPORTANT!: Make sure to use the health_facilities dump table in the database yo
 In a separate terminal, navigate to the project folder and start the React app:
 
 ```bash
-cd to the project folder outside the backend
+cd frontend
 npm start
 ```
 
-The application should open in your default browser at `http://localhost:3000`.
+The application should open in your default browser at `http://localhost:4000`.
 
 ## Usage
 
 - Use the sidebar on small screens or the navbar on larger screens to navigate.
 - Upload CSV files containing facility information to visualize them on the map.
 - Filter facilities by selecting a type or setting a search radius.
-- set a custom location for radius filtering using the input on the top right.
+- set a custom radius filter by right-clicking on the map for large viewport devices or long-press for mobile       devices for context-menu to pop up.
