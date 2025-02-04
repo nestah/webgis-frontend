@@ -150,7 +150,50 @@ function AppContent() {
   const [tempMarker, setTempMarker] = useState(null);
   const [isSearching, setIsSearching] = useState(false); // Added search state
 
- 
+ //  start tour 
+useEffect(() => {
+  if (window.introJs) {
+    const intro = window.introJs();
+    intro.setOptions({
+      steps: [
+        {
+          title: "Welcome to GTL-Afya Healthcare App!",
+          intro: "This is an application to view and query healthcare facilities around you on a map.",
+        },
+        {
+          element: ".search-input",
+          intro: "Use this input to search for a location.",
+        },
+        {
+          element: ".facility-type-filter",
+          intro: "Select a facility type from this dropdown.",
+        },
+        {
+          element: ".map-container",
+          intro: "This is where you can view the facilities on the map and perform a spatial query filter by right clicking or long pressing on the map.",
+        },
+        {
+          element: ".facilities-status",
+          intro: "Here, you can see the number of standard and uploaded facilities.",
+        },
+        {
+          element: ".footer",
+          intro: "This is the footer section of the application.",
+        },
+      ],
+      showProgress: true,
+      showBullets: false,
+      exitOnOverlayClick: true,
+      nextLabel: "Next →",
+      prevLabel: "← Previous",
+      doneLabel: "Got it!",
+      dontShowAgain: true,
+    });
+
+    // Start the tour on page load
+    intro.start();
+  }
+}, []);
 
   // Enhanced memoized filtered facilities
   const filteredFacilities = useMemo(() => {
