@@ -3,12 +3,10 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import axios from 'axios';
 import './App.css';
-// import './FilterComponent.css';
 import './RadiusComponent.css';
 import './LoadComponent.css';
 import './viewport.css';
 import Navbar from './Navbar';
-// import FilterComponent from './FilterComponent';
 import SearchInput from './SearchInput';
 import UploadPopup from './UploadPopup';
 import RadiusComponent from './RadiusComponent';
@@ -36,6 +34,14 @@ const radiusToZoom = (radiusKm) => {
   const fovDeg = (radiusKm / MAP_CONSTANTS.EARTH_RADIUS_KM) * MAP_CONSTANTS.RADIANS_TO_DEGREES * 2;
   const zoom = Math.log2(360 / fovDeg) - 1;
   return Math.min(Math.max(zoom, 1), 20);
+};
+const createMap = (container, viewport, maptilerKey) => {
+  return new maplibregl.Map({
+    container: container,
+    style: `https://api.maptiler.com/maps/streets/style.json?key=${maptilerKey}`,
+    center: [viewport.longitude, viewport.latitude],
+    zoom: viewport.zoom,
+  });
 };
 
 const drawRadiusCircle = (map, center, radiusKm) => {
@@ -128,9 +134,9 @@ function AppContent() {
   const longPressTimeout = useRef(null);
   const touchStartTime = useRef(null);
   const markersRef = useRef([]); // Added ref for markers management
+  const handleContextMenuRef = useRef();
 
   // State
-  const [viewport, setViewport] = useState(MAP_CONSTANTS.INITIAL_VIEWPORT);
   const { setIsLoading } = useLoading();
   const [contentLoaded, setContentLoaded] = useState(false);
   const [facilities, setFacilities] = useState([]);
@@ -144,6 +150,8 @@ function AppContent() {
   const [tempMarker, setTempMarker] = useState(null);
   const [isSearching, setIsSearching] = useState(false); // Added search state
 
+ 
+
   // Enhanced memoized filtered facilities
   const filteredFacilities = useMemo(() => {
     const allFacilities = facilities.concat(uploadedFacilities.map(f => ({
@@ -155,48 +163,63 @@ function AppContent() {
       ? allFacilities 
       : allFacilities.filter(facility => facility.facility_type === selectedFacilityType);
   }, [facilities, uploadedFacilities, selectedFacilityType]);
-// defining handlecontextmenu here 
-const handleContextMenu = useCallback((lngLat) => {
-  if (!lngLat) return;
-  
-  if (tempMarker) {
-    tempMarker.remove();
-  }
+// defining handlecontextmenuRef here to use in the ref
+ useEffect(() => {
+  handleContextMenuRef.current = (lngLat) => {
+    if (!lngLat) return;
 
-  const newMarker = new maplibregl.Marker({ color: 'red' })
-    .setLngLat([lngLat.lng, lngLat.lat])
-    .addTo(map.current);
-  
-  setTempMarker(newMarker);
-  setRadiusCenter(lngLat);
-  setShowRadiusPopup(true);
-},[tempMarker]);
-
-  // Touch event handlers
-  const handleTouchStart = useCallback((e) => {
-    if (e.touches.length !== 1) return;
-    
-    const touch = e.touches[0];
-    touchStartTime.current = Date.now();
-    
-    longPressTimeout.current = setTimeout(() => {
-      const rect = mapContainer.current.getBoundingClientRect();
-      const point = map.current.unproject([
-        touch.clientX - rect.left,
-        touch.clientY - rect.top
-      ]);
-      
-      handleContextMenu(point);
-    }, MAP_CONSTANTS.LONG_PRESS_DURATION);
-  },[handleContextMenu]);
-
-  const handleTouchEnd = useCallback(() => {
-    if (longPressTimeout.current) {
-      clearTimeout(longPressTimeout.current);
+    if (tempMarker) {
+      tempMarker.remove();
     }
-  },[]);
 
- 
+    const newMarker = new maplibregl.Marker({ color: 'red' })
+      .setLngLat([lngLat.lng, lngLat.lat])
+      .addTo(map.current);
+    
+    setTempMarker(newMarker);
+    setRadiusCenter(lngLat);
+    setShowRadiusPopup(true);
+  };
+}, [tempMarker]); // Only update ref when tempMarker changes
+
+// Touch event handlers using refs
+const handleTouchStart = useCallback((e) => {
+  if (e.touches.length !== 1) return;
+  
+  const touch = e.touches[0];
+  touchStartTime.current = Date.now();
+  
+  longPressTimeout.current = setTimeout(() => {
+    const rect = mapContainer.current.getBoundingClientRect();
+    const point = map.current.unproject([
+      touch.clientX - rect.left,
+      touch.clientY - rect.top
+    ]);
+    
+    handleContextMenuRef.current(point); // Use ref-based handler
+  }, MAP_CONSTANTS.LONG_PRESS_DURATION);
+}, []); // No dependencies
+
+const handleTouchEnd = useCallback(() => {
+  if (longPressTimeout.current) {
+    clearTimeout(longPressTimeout.current);
+  }
+}, []);
+
+
+   // Memoize the event handlers
+   const memoizedHandleContextMenu = useCallback((lngLat) => {
+    handleContextMenuRef(lngLat);
+  }, [handleContextMenuRef]);
+
+  const memoizedHandleTouchStart = useCallback((e) => {
+    handleTouchStart(e);
+  }, [handleTouchStart]);
+
+  const memoizedHandleTouchEnd = useCallback(() => {
+    handleTouchEnd();
+  }, [handleTouchEnd]);
+
   // Initialize map
   useEffect(() => {
     if (map.current) return;
@@ -206,12 +229,8 @@ const handleContextMenu = useCallback((lngLat) => {
       initialLoader.remove();
     }
 
-    map.current = new maplibregl.Map({
-      container: container,
-      style: `https://api.maptiler.com/maps/streets/style.json?key=${MAP_CONSTANTS.MAPTILER_KEY}`,
-      center: [viewport.longitude, viewport.latitude],
-      zoom: viewport.zoom,
-    });
+     // Create map instance using the utility function
+     map.current = createMap(container, MAP_CONSTANTS.INITIAL_VIEWPORT, MAP_CONSTANTS.MAPTILER_KEY);
 
     map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
     map.current.addControl(new maplibregl.GeolocateControl({
@@ -219,25 +238,29 @@ const handleContextMenu = useCallback((lngLat) => {
       trackUserLocation: true,
     }));
 
-    map.current.on('contextmenu', (e) => handleContextMenu(e.lngLat));
+   // Event listeners using ref-based handlers
+    map.current.on('contextmenu', (e) => handleContextMenuRef.current(e.lngLat));
     map.current.on('load', () => {
       setMapLoaded(true);
       setContentLoaded(true);
     });
 
-    container.addEventListener('touchstart', handleTouchStart);
-    container.addEventListener('touchend', handleTouchEnd);
-    container.addEventListener('touchcancel', handleTouchEnd);
+  
+      // Touch event listeners
+      container.addEventListener('touchstart', memoizedHandleTouchStart);
+      container.addEventListener('touchend', memoizedHandleTouchEnd);
+      container.addEventListener('touchcancel', memoizedHandleTouchEnd);
+  
 
     return () => {
       map.current.remove();
       if (container) {
-        container.removeEventListener('touchstart', handleTouchStart);
-        container.removeEventListener('touchend', handleTouchEnd);
-        container.removeEventListener('touchcancel', handleTouchEnd);
+        container.removeEventListener('touchstart', memoizedHandleTouchStart);
+        container.removeEventListener('touchend', memoizedHandleTouchEnd);
+        container.removeEventListener('touchcancel', memoizedHandleTouchEnd);
       }
     };
-  }, [handleContextMenu, handleTouchStart,handleTouchEnd, viewport.latitude, viewport.longitude, viewport.zoom]);
+  },[memoizedHandleTouchStart, memoizedHandleTouchEnd, memoizedHandleContextMenu]);
 
   // Enhanced data fetching
   useEffect(() => {
@@ -297,15 +320,7 @@ const handleContextMenu = useCallback((lngLat) => {
       id: 'facilities',
       type: 'circle',
       source: 'facilities',
-      paint: {
-        // 'circle-radius': 10,
-        // 'circle-color': [
-        //   'case',
-        //   ['==', ['get', 'isUploaded'], true],
-        //   '#00bf7c',
-        //   '#007cbf'
-        // ],
-         // Circle radius interpolates based on zoom level
+      paint: {       
     'circle-radius': [
       'interpolate',
       ['linear'],
@@ -381,7 +396,7 @@ const handleContextMenu = useCallback((lngLat) => {
   }, [filteredFacilities]);
 
   // Enhanced search functionality
-  const handleSearch = async (query) => {
+  const handleSearch = useCallback( async (query) => {
     if (!query.trim()) return;
     
     setIsSearching(true);
@@ -389,16 +404,23 @@ const handleContextMenu = useCallback((lngLat) => {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
       );
+      // Check if response is okay
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
       const data = await response.json();
-      
+     
+    // Check if data is valid and contains results
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error("Location not found");
+    }
+ 
       if (data && data.length > 0) {
         const { lat, lon } = data[0];
         const newLat = parseFloat(lat);
         const newLon = parseFloat(lon);
-        
-        setViewport({ latitude: newLat, longitude: newLon, zoom: 10 });
-        
-        map.current.flyTo({
+           
+      map.current.flyTo({
           center: [newLon, newLat],
           zoom: 10,
           essential: true,
@@ -410,16 +432,21 @@ const handleContextMenu = useCallback((lngLat) => {
       }
     } catch (error) {
       console.error('Search error:', error);
-      alert('Error performing search. Please try again.');
+      if(error.message === 'Location not found') {
+        alert('Location not found. Please try a different search');
+      }else{
+        alert('Error performing search. Please try again.');
+      }
+      
     } finally {
       setIsSearching(false);
     }
-  };
+  },[setIsSearching, map]);
 
   // Debounced search handler
-  const debouncedSearch = useMemo(
+  const debouncedSearch = useMemo (
     () => debounce(handleSearch, MAP_CONSTANTS.SEARCH_DEBOUNCE_MS),
-    []
+    [handleSearch]
   );
   
 
@@ -428,11 +455,6 @@ const handleContextMenu = useCallback((lngLat) => {
     if (!radiusCenter || !radius) return;
 
     const newZoom = radiusToZoom(radius);
-    setViewport({
-      latitude: radiusCenter.lat,
-      longitude: radiusCenter.lng,
-      zoom: newZoom,
-    });
 
     map.current.flyTo({
       center: [radiusCenter.lng, radiusCenter.lat],
