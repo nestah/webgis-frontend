@@ -310,3 +310,31 @@ body {
     z-index: 10;
   }
 }
+@media (max-width: 768px) {
+  .facilities-status {
+    position: fixed;
+    bottom: 40px; /* Places it just above the footer */
+    left: 0;
+    width: 100%;
+    background-color: #f8f8f8;
+    padding: 0.75rem;
+    text-align: center;
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid #ccc;
+    z-index: 1000;
+  }
+
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  .main-section {
+    height: calc(100vh - 80px); /* Adjust height to fit status & footer */
+    overflow-y: auto;
+    margin-bottom: 0;
+  }
+}
