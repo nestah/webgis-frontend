@@ -152,8 +152,10 @@ function AppContent() {
 
  //  start tour 
 useEffect(() => {
-  if (window.introJs) {
-    const intro = window.introJs();
+  if (mapLoaded && window.introJs) {
+    // set 5 sec delay before starting the tour
+    setTimeout(() =>{
+ const intro = window.introJs();
     intro.setOptions({
       steps: [
         {
@@ -190,10 +192,12 @@ useEffect(() => {
       dontShowAgain: true,
     });
 
-    // Start the tour on page load
+    // Start the tour after 5 seconds
     intro.start();
+    }, 5000)
+   
   }
-}, []);
+}, [mapLoaded]);
 
   // Enhanced memoized filtered facilities
   const filteredFacilities = useMemo(() => {
