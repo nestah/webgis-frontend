@@ -1,3 +1,5 @@
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/7914dda9-3ee5-4af4-a953-583b2cf636fe/deploy-status)](https://app.netlify.com/sites/gtl-afya/deploys)
 # WebGIS Application
 
 A web-based geographic information system (GIS) application that enables visualization, spatial querying, and filtering of geospatial data. This application utilizes React and Maplibre for the frontend map visualization, and a PostgreSQL/PostGIS database for backend geospatial data storage and retrieval.
