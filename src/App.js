@@ -621,7 +621,7 @@ const handleTouchEnd = useCallback(() => {
       </div>
 
       <footer className="footer">
-        &copy; GTL-Afya <span>{new Date().getFullYear()}</span>
+        &copy; GTL-Afya <span>{new Date().getFullYear()}</span>| Phestus
       </footer>
     </div>
   );
